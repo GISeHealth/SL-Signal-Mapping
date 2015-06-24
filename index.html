@@ -1,7 +1,7 @@
 <html>
 <head>
 <meta charset=utf-8 />
-<title>Ebola Emergency Hotline inbound calls</title>
+<title>Sierra Leone Telecommunication</title>
   <link rel="stylesheet" href="http://libs.cartocdn.com/cartodb.js/v3/3.11/themes/css/cartodb.css" />
   <script src="http://libs.cartocdn.com/cartodb.js/v3/3.11/cartodb.js"></script>
   <script src='https://code.jquery.com/jquery-1.11.0.min.js'></script>
@@ -62,10 +62,12 @@
         right: 20px;
         padding: 0;
       }
+
       #choropleth_selector ul {
         padding: 0; margin: 0;
         list-style-type: none;
       }
+
       #choropleth_selector li {
         border-bottom: 1px solid #999;
         padding: 5px 10px;
@@ -74,10 +76,12 @@
         color: #444;
         cursor: auto;
       }
+
       #choropleth_selector li:hover {
         background-color: #F0F0F0;
         cursor: pointer;
       }
+
       #choropleth_selector li.selected {
         background-color: #EEE;
       }
@@ -91,11 +95,14 @@
       center: [8.5,-11.9],
       zoom: 8
     })
+
     L.tileLayer('https://dnv9my2eseobd.cloudfront.net/v3/cartodb.map-4xtxp73f/{z}/{x}/{y}.png', {
       attribution: 'Mapbox <a href="http://mapbox.com/about/maps" target="_blank">Terms &amp; Feedback</a>'
     }).addTo(map);
+
 	var sublayers = [];
-	var sqlQuery = "SELECT cartodb_id, the_geom, the_geom_webmercator, province, chiefdom, district, f2014_Fema, f2014_Male, f2014_Tota, jan18_jan24, jan25_jan31, COALESCE(((jan25_jan31-jan18_jan24)*100)/nullif(jan18_jan24, 0), 0) AS \"jan18_jan24_vs_jan25_jan31\", CONCAT(chiefdom,': ', COALESCE(((jan25_jan31-jan18_jan24)*100)/nullif(jan18_jan24, 0), 0),'%') AS \"Map label\" FROM sl_chiefdom_population_2014_merge4";
+
+	var sqlQuery = "SELECT * FROM geoserver_getfeature_1";
 	
   // create district selector
   function createSelectorDistrict(layer) {
@@ -115,6 +122,7 @@
 	  }
 	  // change the query in the layer to update the map
 	  layer.setSQL(query);
+
 	  // update the map view extent
 		var queryBounds = sql.getBounds(query).done(function(bounds) {
 				map.fitBounds(bounds);
@@ -143,6 +151,7 @@
 		  };
 		});
   }
+
 	// create array with the layers
   var layerSource = {
 	user_name: 'ehealthafrica',
@@ -173,17 +182,10 @@
 		createSelectorDistrict(sublayers[0]);
 		
 		createSelectorChoropleth(sublayers[0]);
+
 		cdb.vis.Vis.addInfowindow(map, layer.getSubLayer(0), ['province', 'chiefdom', 'district', 'f2014_fema', 'f2014_male', 'f2014_tota', 'jan18_jan24', 'jan25_jan31'])		 
 		
-		var legendCallType = new cdb.geo.ui.Legend({
-           type: "custom",
-           data: [
-            { name: "Death (jan25_jan31)", value: "#081B47" },
-            { name: "Suspect (jan25_jan31)", value: "#a6cee3" },
-            { name: "Sick (jan25_jan31)", value: "#B2DF8A" },
-            { name: "Quarantine (jan25_jan31)", value: "#33A02C" }
-           ]
-		});
+
 		
 		// creating legends and add legend to map
 		var legendIncrease = new cdb.geo.ui.Legend({
@@ -215,7 +217,9 @@
 	
 	//Create call type selector
 	var LayerActions = {
+
 	  death: function(){
+
 		if (death_layer == true){
   			query = query.replace(/OR type = 'death'/g,'');
   			sublayers[1].setSQL(sql_global_type + query);
@@ -292,6 +296,7 @@ var sick_layer = false;
 var quarantine_layer = false;
 var suspect_layer = false;
 var death_layer = false;
+
 var checkclick = function() {
   if (quarantine_layer == true){
    removelayer = "quarantine";   
@@ -306,6 +311,7 @@ var checkclick = function() {
    removelayer = "death";   
   }
 };
+
 $('.button').bind( "click", checkclick );
 	
   }
@@ -325,37 +331,15 @@ $('.button').bind( "click", checkclick );
 		<div id="layer_selector" class="cartodb-infobox">
 		  <ul>
 			<li data="all" class="selected">All districts</li>
-			<li data="Bo">Bo</li>
-			<li data="Bombali">Bombali</li>
-			<li data="Bonthe">Bonthe</li>
-			<li data="Kailahun">Kailahun</li>
-			<li data="Kambia">Kambia</li>
-			<li data="Kenema">Kenema</li>
-			<li data="Koinadugu">Koinadugu</li>
-			<li data="Kono">Kono</li>
-			<li data="Moyamba">Moyamba</li>
-			<li data="Port Loko">Port Loko</li>
-			<li data="Pujehun">Pujehun</li>
-			<li data="Tonkolili">Tonkolili</li>
-			<li data="Western Area Rur">Western Area Rural</li>
-			<li data="Western Area Urb">Western Area Urban</li>
 		  </ul>
 		</div>	  
 		<div id="choropleth_selector" class="cartodb-infobox">
-		  <ul>
-			<li data="calls">Call count (jan18_jan24 vs jan25_jan31)</li>
-			<li data="population">Total population</li>
-		  </ul>
 		</div>
 	</div>
     </td>
     <td width="" height="100%">	  
 	  <div id='map'></div>
 	   <div id='menu'>
-		<a href="#death" id="death" class="button death">Death</a> 
-		<a href="#sick" id="sick" class="button sick">Sick</a> 
-		<a href="#suspect" id="suspect" class="button suspect">Suspect</a> 
-		<a href="#quarantine" id="quarantine" class="button quarantine">Quarantine</a>
 	  </div>
 	</td>
   </tr>
