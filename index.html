@@ -107,11 +107,11 @@
   // create district selector
   function createSelectorDistrict(layer) {
 	var sql = new cartodb.SQL({ user: 'ehealthafrica' });
-	var $options = $('#layer_selector li');
+	var $options = $('#layer_selector');
 	$options.click(function(e) {
 	  // get the area of the selected layer
 	  var $li = $(e.target);
-	  var area = $li.attr('data');
+	  var area = $li.attr('value');
 	  // deselect all and select the clicked one
 	  $options.removeClass('selected');
 	  $li.addClass('selected');
@@ -316,23 +316,13 @@ $('.button').bind( "click", checkclick );
 	<td width="160" rowspan=2 valign=top>
 	<div id="controls" rowspan="2">
 		<div id="layer_selector" class="cartodb-infobox">
-		  <ul>
-			<li data="all" class="selected">All districts</li>
-			<li data="Bo">Bo</li>
-			<li data="Bombali">Bombali</li>
-			<li data="Bonthe">Bonthe</li>
-			<li data="Kailahun">Kailahun</li>
-			<li data="Kambia">Kambia</li>
-			<li data="Kenema                                                      ">Kenema</li>
-			<li data="Koinadugu">Koinadugu</li>
-			<li data="Kono">Kono</li>
-			<li data="Moyamba">Moyamba</li>
-			<li data="Port Loko">Port Loko</li>
-			<li data="Pujehun">Pujehun</li>
-			<li data="Tonkolili">Tonkolili</li>
-			<li data="Western Area Rur">Western Area Rural</li>
-			<li data="Western Area Urb">Western Area Urban</li>
-		  </ul>
+		<div id="Select-Title"><h7>Choose a District</h7></div>
+		<div>
+		<select style="width:125px;" tabindex="2">	
+				<option value="all" selected>All</option>
+				<option value="Kenema                                                      ">Kenema</option>
+		</select>
+
 		</div>	  
 	</div>
     </td>
