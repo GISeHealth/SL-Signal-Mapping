@@ -1,0 +1,364 @@
+<html>
+<head>
+<meta charset=utf-8 />
+<title>Ebola Emergency Hotline inbound calls</title>
+  <link rel="stylesheet" href="http://libs.cartocdn.com/cartodb.js/v3/3.11/themes/css/cartodb.css" />
+  <script src="http://libs.cartocdn.com/cartodb.js/v3/3.11/cartodb.js"></script>
+  <script src='https://code.jquery.com/jquery-1.11.0.min.js'></script>
+   <link rel="stylesheet" type="text/css" href="styles.css" media="all" />
+    <link rel="stylesheet" href="iThing.css" type="text/css" />
+  <style>
+    html, body {width:100%; height:100%; padding: 0; margin: 0;}
+    #map { width: 100%; height:100%; background: black;}
+    #menu { position: absolute; top: 95px; right: 300px; width: 500px; height:60px; background: transparent; z-index:10;}
+    #menu a { 
+      margin: 15px 10px 0 0;
+      float: right;
+      vertical-align: baseline;
+      width: 70px;
+      padding: 5px;
+      text-align: center;
+      font: bold 11px "Helvetica",Arial;
+      line-height: normal;
+      color: #555;
+      border-radius: 4px;
+      border: 1px solid #777777;
+      background: #ffffff;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    #menu a.selected { 
+      color: #F84F40;
+    }
+	
+	  #layer_selector {
+        position: absolute;
+        top: 110px;
+        left: 15px;
+        padding: 0;
+      }
+      #layer_selector ul {
+        padding: 0; margin: 0;
+        list-style-type: none;
+      }
+      #layer_selector li {
+        border-bottom: 1px solid #999;
+        padding: 5px 10px;
+        font-family: "Helvetica", Arial;
+        font-size: 13px;
+        color: #444;
+        cursor: auto;
+      }
+      #layer_selector li:hover {
+        background-color: #F0F0F0;
+        cursor: pointer;
+      }
+      #layer_selector li.selected {
+        background-color: #EEE;
+      }
+	  #choropleth_selector {
+        position: absolute;
+        top: 110px;
+        right: 20px;
+        padding: 0;
+      }
+      #choropleth_selector ul {
+        padding: 0; margin: 0;
+        list-style-type: none;
+      }
+      #choropleth_selector li {
+        border-bottom: 1px solid #999;
+        padding: 5px 10px;
+        font-family: "Helvetica", Arial;
+        font-size: 13px;
+        color: #444;
+        cursor: auto;
+      }
+      #choropleth_selector li:hover {
+        background-color: #F0F0F0;
+        cursor: pointer;
+      }
+      #choropleth_selector li.selected {
+        background-color: #EEE;
+      }
+  </style>
+  
+  <script>
+  var map;
+  function init(){
+    // initiate leaflet map
+    map = new L.Map('map', { 
+      center: [8.5,-11.9],
+      zoom: 8
+    })
+    L.tileLayer('https://dnv9my2eseobd.cloudfront.net/v3/cartodb.map-4xtxp73f/{z}/{x}/{y}.png', {
+      attribution: 'Mapbox <a href="http://mapbox.com/about/maps" target="_blank">Terms &amp; Feedback</a>'
+    }).addTo(map);
+	var sublayers = [];
+	var sqlQuery = "SELECT cartodb_id, the_geom, the_geom_webmercator, province, chiefdom, district, f2014_Fema, f2014_Male, f2014_Tota, jan18_jan24, jan25_jan31, COALESCE(((jan25_jan31-jan18_jan24)*100)/nullif(jan18_jan24, 0), 0) AS \"jan18_jan24_vs_jan25_jan31\", CONCAT(chiefdom,': ', COALESCE(((jan25_jan31-jan18_jan24)*100)/nullif(jan18_jan24, 0), 0),'%') AS \"Map label\" FROM sl_chiefdom_population_2014_merge4";
+	
+  // create district selector
+  function createSelectorDistrict(layer) {
+	var sql = new cartodb.SQL({ user: 'ehealthafrica' });
+	var $options = $('#layer_selector li');
+	$options.click(function(e) {
+	  // get the area of the selected layer
+	  var $li = $(e.target);
+	  var area = $li.attr('data');
+	  // deselect all and select the clicked one
+	  $options.removeClass('selected');
+	  $li.addClass('selected');
+	  // create query based on data from the layer
+	  var query = sqlQuery;
+	  if(area !== 'all') {
+		query = sqlQuery + " where district = '" + area + "'";
+	  }
+	  // change the query in the layer to update the map
+	  layer.setSQL(query);
+	  // update the map view extent
+		var queryBounds = sql.getBounds(query).done(function(bounds) {
+				map.fitBounds(bounds);
+		});
+	});
+  }
+  
+  // create choropleth selector
+  function createSelectorChoropleth(layer) {
+	var $options = $('#choropleth_selector li');
+	$options.click(function(e) {
+		  // get the choropleth type
+		  var $li = $(e.target);
+		  var type = $li.attr('data');
+		  // deselect all and select the clicked one
+		  $options.removeClass('selected');
+		  $li.addClass('selected');
+		  // create query based on data from the layer
+		  if(type == 'calls') {
+			layer.set({cartocss: "#sl_chiefdom_population_2014_merge4{   polygon-fill: #1a9850;   polygon-opacity: 0.6;   line-color: #FFF;   line-width: 1;   line-opacity: 1; } #sl_chiefdom_population_2014_merge4 [ jan18_jan24_vs_jan25_jan31 <= 10000] {    polygon-fill: #d73027; } #sl_chiefdom_population_2014_merge4 [ jan18_jan24_vs_jan25_jan31 <= 66] {    polygon-fill: #f79272; } #sl_chiefdom_population_2014_merge4 [ jan18_jan24_vs_jan25_jan31 <= 33] {    polygon-fill: #fed6b0; } #sl_chiefdom_population_2014_merge4 [ jan18_jan24_vs_jan25_jan31 <= 0] {    polygon-fill: #fff2cc; } #sl_chiefdom_population_2014_merge4 [ jan18_jan24_vs_jan25_jan31 <= -1] {    polygon-fill: #d2ecb4; } #sl_chiefdom_population_2014_merge4 [ jan18_jan24_vs_jan25_jan31 <= -33] {    polygon-fill: #8cce8a; } #sl_chiefdom_population_2014_merge4 [ jan18_jan24_vs_jan25_jan31 <= -66] {    polygon-fill: #1a9850; }                     #sl_chiefdom_population_2014_merge4::labels {  text-name: [Map label];  text-face-name: 'DejaVu Sans Book';  text-size: 11;  text-label-position-tolerance: 10;  text-fill: #000;  text-halo-fill: #FFF;  text-halo-radius: 1;  text-dy: 0;  text-allow-overlap: false;  text-placement: point;  text-placement-type: simple;}"
+			})
+		  };
+		  if(type == 'population') {
+			layer.set({cartocss: "#sl_chiefdom_population_2014_merge4{  polygon-fill: #ECF0F6;  polygon-opacity: 0.6;  line-color: #FFF;  line-width: 1;  line-opacity: 1;}#sl_chiefdom_population_2014_merge4 [ f2014_tota <= 378041] {   polygon-fill: #43618F;}#sl_chiefdom_population_2014_merge4 [ f2014_tota <= 57196] {   polygon-fill: #4E71A6;}#sl_chiefdom_population_2014_merge4 [ f2014_tota <= 38373] {   polygon-fill: #6182B5;}#sl_chiefdom_population_2014_merge4 [ f2014_tota <= 30196] {   polygon-fill: #849EC5;}#sl_chiefdom_population_2014_merge4 [ f2014_tota <= 23640] {   polygon-fill: #9BB0D0;}#sl_chiefdom_population_2014_merge4 [ f2014_tota <= 16340] {   polygon-fill: #B2C2DB;}#sl_chiefdom_population_2014_merge4 [ f2014_tota <= 10650] {   polygon-fill: #ECF0F6;}#sl_chiefdom_population_2014_merge4::labels {  text-name: [Map label];  text-face-name: 'DejaVu Sans Book';  text-size: 11;  text-label-position-tolerance: 10;  text-fill: #000;  text-halo-fill: #FFF;  text-halo-radius: 1;  text-dy: 0;  text-allow-overlap: false;  text-placement: point;  text-placement-type: simple;}"
+			})
+		  };
+		});
+  }
+	// create array with the layers
+  var layerSource = {
+	user_name: 'ehealthafrica',
+	type: 'cartodb',
+	sublayers: [{
+	  sql: sqlQuery,
+	  cartocss: "#sl_chiefdom_population_2014_merge4{   polygon-fill: #1a9850;   polygon-opacity: 0.6;   line-color: #FFF;   line-width: 1;   line-opacity: 1; } #sl_chiefdom_population_2014_merge4 [ jan18_jan24_vs_jan25_jan31 <= 10000] {    polygon-fill: #d73027; } #sl_chiefdom_population_2014_merge4 [ jan18_jan24_vs_jan25_jan31 <= 66] {    polygon-fill: #f79272; } #sl_chiefdom_population_2014_merge4 [ jan18_jan24_vs_jan25_jan31 <= 33] {    polygon-fill: #fed6b0; } #sl_chiefdom_population_2014_merge4 [ jan18_jan24_vs_jan25_jan31 <= 0] {    polygon-fill: #fff2cc; } #sl_chiefdom_population_2014_merge4 [ jan18_jan24_vs_jan25_jan31 <= -1] {    polygon-fill: #d2ecb4; } #sl_chiefdom_population_2014_merge4 [ jan18_jan24_vs_jan25_jan31 <= -33] {    polygon-fill: #8cce8a; } #sl_chiefdom_population_2014_merge4 [ jan18_jan24_vs_jan25_jan31 <= -66] {    polygon-fill: #1a9850; }                     #sl_chiefdom_population_2014_merge4::labels {  text-name: [Map label];  text-face-name: 'DejaVu Sans Book';  text-size: 11;  text-label-position-tolerance: 10;  text-fill: #000;  text-halo-fill: #FFF;  text-halo-radius: 1;  text-dy: 0;  text-allow-overlap: false;  text-placement: point;  text-placement-type: simple;}"
+        },
+	{
+	  sql: "SELECT * FROM report_2",
+	  cartocss: "#report_2 {   marker-fill-opacity: 0.9;   marker-line-color: #FFF;   marker-line-width: 1.5;   marker-line-opacity: 1;   marker-placement: point;   marker-type: ellipse;   marker-width: 10;   marker-allow-overlap: true;}#report_2[type='death'] {   marker-fill: #081B47;}#report_2[type='suspect'] {   marker-fill: #a6cee3;}#report_2[type='sick'] {   marker-fill: #B2DF8A;}#report_2[type='quarantine'] {   marker-fill: #33A02C;}"
+	},
+	{
+	  sql: "SELECT * FROM sl_ecf_update_17_01_15",
+	  cartocss: "#sl_ecf_update_17_01_15{  marker-file: url(http://com.cartodb.users-assets.production.s3.amazonaws.com/pin-maps/pins3.svg);  marker-fill-opacity: 0.9;  marker-line-color: #FFF;  marker-line-width: 1.5;  marker-line-opacity: 1;  marker-placement: point;  marker-type: ellipse;  marker-width: 9.5;  marker-fill: #850200;  marker-allow-overlap: true;  marker-comp-op: multiply;}#sl_ecf_update_17_01_15::labels {  text-name: [ecf_name];  text-face-name: 'DejaVu Sans Book';  text-size: 9;  text-label-position-tolerance: 10;  text-fill: #850200;  text-halo-fill: #FFF;  text-halo-radius: 1;  text-dy: -9.5;  text-allow-overlap: false;  text-placement: point;  text-placement-type: simple;}"
+	}]
+	}
+		  
+	cartodb.createLayer(map, layerSource)
+	  .addTo(map)
+	  .on('done', function(layer) {
+		
+		for (var i = 0; i < layer.getSubLayerCount(); i++) {
+            sublayers[i] = layer.getSubLayer(i);
+			//alert("Congrats, you added sublayer #" + i + "!");
+		}
+		
+		createSelectorDistrict(sublayers[0]);
+		
+		createSelectorChoropleth(sublayers[0]);
+		cdb.vis.Vis.addInfowindow(map, layer.getSubLayer(0), ['province', 'chiefdom', 'district', 'f2014_fema', 'f2014_male', 'f2014_tota', 'jan18_jan24', 'jan25_jan31'])		 
+		
+		var legendCallType = new cdb.geo.ui.Legend({
+           type: "custom",
+           data: [
+            { name: "Death (jan25_jan31)", value: "#081B47" },
+            { name: "Suspect (jan25_jan31)", value: "#a6cee3" },
+            { name: "Sick (jan25_jan31)", value: "#B2DF8A" },
+            { name: "Quarantine (jan25_jan31)", value: "#33A02C" }
+           ]
+		});
+		
+		// creating legends and add legend to map
+		var legendIncrease = new cdb.geo.ui.Legend({
+           type: "choropleth",
+           data: [
+             { value: "decrease" },
+             { value: "increase" },
+			 { name: "color7", value: "#1a9850" },
+			 { name: "color6", value: "#8cce8a" },
+			 { name: "color5", value: "#d2ecb4" },
+			 { name: "color4", value: "#fff2cc" },
+			 { name: "color3", value: "#fed6b0" },
+			 { name: "color2", value: "#f79272" },
+             { name: "color1", value: "#d73027" }
+           ]
+		});	
+		var stackedLegend = new cdb.geo.ui.StackedLegend({
+           legends: [legendCallType, legendIncrease]
+         }); 
+        $('#map').append(stackedLegend.render().el);
+		
+	  }).on('error', function() {
+		//log the error
+	  });
+	 
+	var layer_init = false ; 
+	var sql_global_type = "SELECT * FROM report_2 where type = 'empty' ";
+	var query = "";
+	
+	//Create call type selector
+	var LayerActions = {
+	  death: function(){
+		if (death_layer == true){
+  			query = query.replace(/OR type = 'death'/g,'');
+  			sublayers[1].setSQL(sql_global_type + query);
+  			$('.button.death').removeClass('selected');
+  			removelayer == "";
+  			death_layer = false;
+  		}else{
+  			query = query + " OR type = 'death' ";
+	  		sublayers[1].setSQL(sql_global_type + query);
+	  		death_layer = true ;
+		}	
+		
+		return death_layer;
+		
+	  },
+	  sick: function(){
+	
+	if (sick_layer == true){
+  			query = query.replace(/OR type = 'sick'/g,'');
+  			sublayers[1].setSQL(sql_global_type + query);
+  			$('.button.sick').removeClass('selected');
+  			removelayer == "";
+  			sick_layer = false;
+  		}else{
+  			query = query + " OR type = 'sick' ";
+	  		sublayers[1].setSQL(sql_global_type + query);
+	  		sick_layer = true ;
+		}	
+		return sick_layer;
+	
+	  },
+	  suspect: function(){
+		
+		if (suspect_layer == true){
+  			query = query.replace(/OR type = 'suspect'/g,'');
+  			sublayers[1].setSQL(sql_global_type + query);
+  			$('.button.suspect').removeClass('selected');
+  			removelayer == "";
+  			suspect_layer = false;
+  		}else{
+  			query = query + " OR type = 'suspect' ";
+	  		sublayers[1].setSQL(sql_global_type + query);
+			suspect_layer = true ;
+		}
+		
+		return suspect_layer;
+		
+	  },
+	  quarantine: function(){
+	
+		if (quarantine_layer == true){
+  			query = query.replace(/OR type = 'quarantine'/g,'');
+  			sublayers[1].setSQL(sql_global_type + query);
+  			$('.button.quarantine').removeClass('selected');
+  			removelayer == "";
+  			quarantine_layer = false;
+  		}else{
+  			query = query + " OR type = 'quarantine' ";
+	  		sublayers[1].setSQL(sql_global_type + query);
+			quarantine_layer = true ;
+		}
+		
+		return quarantine_layer;
+		
+	  }
+	}	  
+	$('.button').click(function() {
+	  $(this).addClass('selected');
+	  LayerActions[$(this).attr('id')]();
+	});
+	
+var removelayer = "";
+var sick_layer = false;
+var quarantine_layer = false;
+var suspect_layer = false;
+var death_layer = false;
+var checkclick = function() {
+  if (quarantine_layer == true){
+   removelayer = "quarantine";   
+  }
+  if (sick_layer == true){
+   removelayer = "sick";   
+  }
+  if (suspect_layer == true){
+   removelayer = "suspect";   
+  }
+  if (death_layer == true){
+   removelayer = "death";   
+  }
+};
+$('.button').bind( "click", checkclick );
+	
+  }
+  </script>
+</head>
+<body onload="init()">
+ <table border=0 width="100%" height="90%" celpadding=5>
+  <tr>
+	<td colspan=2 class="headerbar">
+	  <img src="http://ehealthafrica.org/wp-content/uploads/styx/1345117248_eHealth_logo_h96.png" height=48>
+	  <img src="http://www.netfuse.net/images/logo.png" style="float:right">
+	</td>
+  </tr>  
+  <tr>
+	<td width="160" rowspan=2 valign=top>
+	<div id="controls" rowspan="2">
+		<div id="layer_selector" class="cartodb-infobox">
+		  <ul>
+			<li data="all" class="selected">All districts</li>
+			<li data="Bo">Bo</li>
+			<li data="Bombali">Bombali</li>
+			<li data="Bonthe">Bonthe</li>
+			<li data="Kailahun">Kailahun</li>
+			<li data="Kambia">Kambia</li>
+			<li data="Kenema">Kenema</li>
+			<li data="Koinadugu">Koinadugu</li>
+			<li data="Kono">Kono</li>
+			<li data="Moyamba">Moyamba</li>
+			<li data="Port Loko">Port Loko</li>
+			<li data="Pujehun">Pujehun</li>
+			<li data="Tonkolili">Tonkolili</li>
+			<li data="Western Area Rur">Western Area Rural</li>
+			<li data="Western Area Urb">Western Area Urban</li>
+		  </ul>
+		</div>	  
+		<div id="choropleth_selector" class="cartodb-infobox">
+		  <ul>
+			<li data="calls">Call count (jan18_jan24 vs jan25_jan31)</li>
+			<li data="population">Total population</li>
+		  </ul>
+		</div>
+	</div>
+    </td>
+    <td width="" height="100%">	  
+	  <div id='map'></div>
+	   <div id='menu'>
+		<a href="#death" id="death" class="button death">Death</a> 
+		<a href="#sick" id="sick" class="button sick">Sick</a> 
+		<a href="#suspect" id="suspect" class="button suspect">Suspect</a> 
+		<a href="#quarantine" id="quarantine" class="button quarantine">Quarantine</a>
+	  </div>
+	</td>
+  </tr>
+</table>
+</body>
+</html>
