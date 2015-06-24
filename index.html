@@ -1,7 +1,7 @@
 <html>
 <head>
 <meta charset=utf-8 />
-<title>Ebola Emergency Hotline inbound calls</title>
+<title>Sierra Leone</title>
   <link rel="stylesheet" href="http://libs.cartocdn.com/cartodb.js/v3/3.11/themes/css/cartodb.css" />
   <script src="http://libs.cartocdn.com/cartodb.js/v3/3.11/cartodb.js"></script>
   <script src='https://code.jquery.com/jquery-1.11.0.min.js'></script>
@@ -102,7 +102,7 @@
 
 	var sublayers = [];
 
-	var sqlQuery = "SELECT cartodb_id, the_geom, the_geom_webmercator, province, chiefdom, district, f2014_Fema, f2014_Male, f2014_Tota, jan18_jan24, jan25_jan31, COALESCE(((jan25_jan31-jan18_jan24)*100)/nullif(jan18_jan24, 0), 0) AS \"jan18_jan24_vs_jan25_jan31\", CONCAT(chiefdom,': ', COALESCE(((jan25_jan31-jan18_jan24)*100)/nullif(jan18_jan24, 0), 0),'%') AS \"Map label\" FROM sl_chiefdom_population_2014_merge4";
+	var sqlQuery = "SELECT district_name as province, district_name as f2014_Fema, district_name as f2014_Male, district_name as f2014_Tota, district_name as jan18_jan24, district_name as jan25_jan31, district_name, district_name as district, chiefdom_name as chiefdom, district_name AS \"Map label\", district_name AS jan18_jan24_vs_jan25_jan31, cartodb_id, the_geom, the_geom_webmercator FROM geoserver_getfeature_1";
 	
   // create district selector
   function createSelectorDistrict(layer) {
@@ -118,7 +118,7 @@
 	  // create query based on data from the layer
 	  var query = sqlQuery;
 	  if(area !== 'all') {
-		query = sqlQuery + " where district = '" + area + "'";
+		query = sqlQuery + " where district_name = '" + area + "'";
 	  }
 	  // change the query in the layer to update the map
 	  layer.setSQL(query);
@@ -142,7 +142,7 @@
 		  $li.addClass('selected');
 		  // create query based on data from the layer
 		  if(type == 'calls') {
-			layer.set({cartocss: "#sl_chiefdom_population_2014_merge4{   polygon-fill: #1a9850;   polygon-opacity: 0.6;   line-color: #FFF;   line-width: 1;   line-opacity: 1; } #sl_chiefdom_population_2014_merge4 [ jan18_jan24_vs_jan25_jan31 <= 10000] {    polygon-fill: #d73027; } #sl_chiefdom_population_2014_merge4 [ jan18_jan24_vs_jan25_jan31 <= 66] {    polygon-fill: #f79272; } #sl_chiefdom_population_2014_merge4 [ jan18_jan24_vs_jan25_jan31 <= 33] {    polygon-fill: #fed6b0; } #sl_chiefdom_population_2014_merge4 [ jan18_jan24_vs_jan25_jan31 <= 0] {    polygon-fill: #fff2cc; } #sl_chiefdom_population_2014_merge4 [ jan18_jan24_vs_jan25_jan31 <= -1] {    polygon-fill: #d2ecb4; } #sl_chiefdom_population_2014_merge4 [ jan18_jan24_vs_jan25_jan31 <= -33] {    polygon-fill: #8cce8a; } #sl_chiefdom_population_2014_merge4 [ jan18_jan24_vs_jan25_jan31 <= -66] {    polygon-fill: #1a9850; }                     #sl_chiefdom_population_2014_merge4::labels {  text-name: [Map label];  text-face-name: 'DejaVu Sans Book';  text-size: 11;  text-label-position-tolerance: 10;  text-fill: #000;  text-halo-fill: #FFF;  text-halo-radius: 1;  text-dy: 0;  text-allow-overlap: false;  text-placement: point;  text-placement-type: simple;}"
+			layer.set({cartocss: "#sl_chiefdom_population_2014_merge4{   polygon-fill: #1a9850;   polygon-opacity: 0.6;   line-color: #FFF;   line-width: 1;   line-opacity: 1; } #sl_chiefdom_population_2014_merge4 [ jan18_jan24_vs_jan25_jan31 <= 10000] {    polygon-fill: #d73027; } #sl_chiefdom_population_2014_merge4 [ jan18_jan24_vs_jan25_jan31 <= 66] {    polygon-fill: #f79272; } #sl_chiefdom_population_2014_merge4 [ jan18_jan24_vs_jan25_jan31 <= 33] {    polygon-fill: #fed6b0; } #sl_chiefdom_population_2014_merge4 [ jan18_jan24_vs_jan25_jan31 <= 0] {    polygon-fill: #fff2cc; } #sl_chiefdom_population_2014_merge4 [ jan18_jan24_vs_jan25_jan31 <= -1] {    polygon-fill: #d2ecb4; } #sl_chiefdom_population_2014_merge4 [ jan18_jan24_vs_jan25_jan31 <= -33] {    polygon-fill: #8cce8a; } #sl_chiefdom_population_2014_merge4 [ jan18_jan24_vs_jan25_jan31 <= -66] {    polygon-fill: #1a9850; }                     #sl_chiefdom_population_2014_merge4::labels {  text-name: [Map label];  text-face-name: 'DejaVu Sans Book';  text-size: 11;  text-label-position-tolerance: 10;  text-fill: #000;  text-halo-fill: #FFF;  text-halo-radius: 1;  text-dy: 0;  text-allow-overlap: false;  text-placement: point;  text-placement-type: simple;}#geoserver_getfeature_1{polygon-fill: #FF6600;  polygon-opacity: 1;  line-color: #FFF; line-width: 0;line-opacity: 1;}"
 			})
 		  };
 		  if(type == 'population') {
@@ -159,15 +159,7 @@
 	sublayers: [{
 	  sql: sqlQuery,
 	  cartocss: "#sl_chiefdom_population_2014_merge4{   polygon-fill: #1a9850;   polygon-opacity: 0.6;   line-color: #FFF;   line-width: 1;   line-opacity: 1; } #sl_chiefdom_population_2014_merge4 [ jan18_jan24_vs_jan25_jan31 <= 10000] {    polygon-fill: #d73027; } #sl_chiefdom_population_2014_merge4 [ jan18_jan24_vs_jan25_jan31 <= 66] {    polygon-fill: #f79272; } #sl_chiefdom_population_2014_merge4 [ jan18_jan24_vs_jan25_jan31 <= 33] {    polygon-fill: #fed6b0; } #sl_chiefdom_population_2014_merge4 [ jan18_jan24_vs_jan25_jan31 <= 0] {    polygon-fill: #fff2cc; } #sl_chiefdom_population_2014_merge4 [ jan18_jan24_vs_jan25_jan31 <= -1] {    polygon-fill: #d2ecb4; } #sl_chiefdom_population_2014_merge4 [ jan18_jan24_vs_jan25_jan31 <= -33] {    polygon-fill: #8cce8a; } #sl_chiefdom_population_2014_merge4 [ jan18_jan24_vs_jan25_jan31 <= -66] {    polygon-fill: #1a9850; }                     #sl_chiefdom_population_2014_merge4::labels {  text-name: [Map label];  text-face-name: 'DejaVu Sans Book';  text-size: 11;  text-label-position-tolerance: 10;  text-fill: #000;  text-halo-fill: #FFF;  text-halo-radius: 1;  text-dy: 0;  text-allow-overlap: false;  text-placement: point;  text-placement-type: simple;}"
-        },
-	{
-	  sql: "SELECT * FROM report_2",
-	  cartocss: "#report_2 {   marker-fill-opacity: 0.9;   marker-line-color: #FFF;   marker-line-width: 1.5;   marker-line-opacity: 1;   marker-placement: point;   marker-type: ellipse;   marker-width: 10;   marker-allow-overlap: true;}#report_2[type='death'] {   marker-fill: #081B47;}#report_2[type='suspect'] {   marker-fill: #a6cee3;}#report_2[type='sick'] {   marker-fill: #B2DF8A;}#report_2[type='quarantine'] {   marker-fill: #33A02C;}"
-	},
-	{
-	  sql: "SELECT * FROM sl_ecf_update_17_01_15",
-	  cartocss: "#sl_ecf_update_17_01_15{  marker-file: url(http://com.cartodb.users-assets.production.s3.amazonaws.com/pin-maps/pins3.svg);  marker-fill-opacity: 0.9;  marker-line-color: #FFF;  marker-line-width: 1.5;  marker-line-opacity: 1;  marker-placement: point;  marker-type: ellipse;  marker-width: 9.5;  marker-fill: #850200;  marker-allow-overlap: true;  marker-comp-op: multiply;}#sl_ecf_update_17_01_15::labels {  text-name: [ecf_name];  text-face-name: 'DejaVu Sans Book';  text-size: 9;  text-label-position-tolerance: 10;  text-fill: #850200;  text-halo-fill: #FFF;  text-halo-radius: 1;  text-dy: -9.5;  text-allow-overlap: false;  text-placement: point;  text-placement-type: simple;}"
-	}]
+        }]
 	}
 		  
 	cartodb.createLayer(map, layerSource)
@@ -188,10 +180,6 @@
 		var legendCallType = new cdb.geo.ui.Legend({
            type: "custom",
            data: [
-            { name: "Death (jan25_jan31)", value: "#081B47" },
-            { name: "Suspect (jan25_jan31)", value: "#a6cee3" },
-            { name: "Sick (jan25_jan31)", value: "#B2DF8A" },
-            { name: "Quarantine (jan25_jan31)", value: "#33A02C" }
            ]
 		});
 		
@@ -199,15 +187,6 @@
 		var legendIncrease = new cdb.geo.ui.Legend({
            type: "choropleth",
            data: [
-             { value: "decrease" },
-             { value: "increase" },
-			 { name: "color7", value: "#1a9850" },
-			 { name: "color6", value: "#8cce8a" },
-			 { name: "color5", value: "#d2ecb4" },
-			 { name: "color4", value: "#fff2cc" },
-			 { name: "color3", value: "#fed6b0" },
-			 { name: "color2", value: "#f79272" },
-             { name: "color1", value: "#d73027" }
            ]
 		});	
 		var stackedLegend = new cdb.geo.ui.StackedLegend({
@@ -355,21 +334,11 @@ $('.button').bind( "click", checkclick );
 			<li data="Western Area Urb">Western Area Urban</li>
 		  </ul>
 		</div>	  
-		<div id="choropleth_selector" class="cartodb-infobox">
-		  <ul>
-			<li data="calls">Call count (jan18_jan24 vs jan25_jan31)</li>
-			<li data="population">Total population</li>
-		  </ul>
-		</div>
 	</div>
     </td>
     <td width="" height="100%">	  
 	  <div id='map'></div>
 	   <div id='menu'>
-		<a href="#death" id="death" class="button death">Death</a> 
-		<a href="#sick" id="sick" class="button sick">Sick</a> 
-		<a href="#suspect" id="suspect" class="button suspect">Suspect</a> 
-		<a href="#quarantine" id="quarantine" class="button quarantine">Quarantine</a>
 	  </div>
 	</td>
   </tr>
