@@ -102,25 +102,50 @@
 
 	var sublayers = [];
 
-	var sqlQuery = "SELECT signal_strength, district_name as province, district_name as f2014_Fema, district_name as f2014_Male, district_name as f2014_Tota, district_name as jan18_jan24, district_name as jan25_jan31, district_name, district_name as district, chiefdom_name as chiefdom, district_name AS \"Map label\", district_name AS jan18_jan24_vs_jan25_jan31, cartodb_id, the_geom, the_geom_webmercator FROM geoserver_getfeature_1";
+	var sqlQuery = "SELECT network_type, net_name, signal_strength, district_name as province, district_name as f2014_Fema, district_name as f2014_Male, district_name as f2014_Tota, district_name as jan18_jan24, district_name as jan25_jan31, district_name, district_name as district, chiefdom_name as chiefdom, district_name AS \"Map label\", district_name AS jan18_jan24_vs_jan25_jan31, cartodb_id, the_geom, the_geom_webmercator FROM geoserver_getfeature_1";
 	
   // create district selector
   function createSelectorDistrict(layer) {
 	var sql = new cartodb.SQL({ user: 'ehealthafrica' });
 	var $options = $('#layer_selector');
+	var $options2 = $('#network_provider');
+	var $options3 = $('#network_type');
+	
 	$options.click(function(e) {
 	  // get the area of the selected layer
 	  var $li = $(e.target);
 	  var area = $('#layer_selector').find(":selected").val();
-  
+      var nprov = $('#network_provider').find(":selected").val();
+      var ntype = $('#network_type').find(":selected").val();
+      
 	  // deselect all and select the clicked one
 	  $options.removeClass('selected');
 	  $li.addClass('selected');
 	  // create query based on data from the layer
-	  var query = sqlQuery;
-	  if(area !== 'all') {
-		query = sqlQuery + " where district_name = '" + area + "'";
+	  var query = sqlQuery  ;
+
+	  if(area !== 'all' && nprov == 'all2' && ntype == 'all3') {
+		query = query + " where district_name = '" + area + "'";
 	  }
+	  if(nprov !== 'all2' && area == 'all' && ntype == 'all3') {
+		query = query + " where net_name = '" + nprov + "'";
+	  }
+	  if(ntype !== 'all3' && area == 'all' && nprov =='all2') {
+		query = query + " where network_type = '" + ntype + "'";
+	  }	  
+	  if(area !== 'all' && nprov !== 'all2' && ntype == 'all3') {
+		query = query + " where district_name = '" + area + "' AND net_name = '" + nprov + "'";
+	  }
+	  if(area !== 'all' && ntype !== 'all3' && nprov == 'all2') {
+		query = query + " where district_name = '" + area + "' AND network_type = '" + ntype + "'";
+		}
+	  if(area == 'all' && nprov !== 'all2' && ntype !== 'all3') {
+		query = query + " where net_name = '" + nprov + "' AND network_type = '" + ntype + "'";
+	  }
+	  if(area !== 'all' && nprov !== 'all2' && ntype !== 'all3') {
+		query = query + " where district_name = '" + area + "' AND net_name = '" + nprov + "' AND network_type = '" + ntype + "'";
+	  }
+
 	  // change the query in the layer to update the map
 	  layer.setSQL(query);
 
@@ -129,7 +154,11 @@
 				map.fitBounds(bounds);
 		});
 	});
-  }
+  
+  
+
+  
+}  
   
   // create choropleth selector
   function createSelectorChoropleth(layer) {
@@ -143,11 +172,11 @@
 		  $li.addClass('selected');
 		  // create query based on data from the layer
 		  if(type == 'calls') {
-			layer.set({cartocss: "#sl_chiefdom_population_2014_merge4{   polygon-fill: #1a9850;   polygon-opacity: 0.6;   line-color: #FFF;   line-width: 1;   line-opacity: 1; } #sl_chiefdom_population_2014_merge4 [ jan18_jan24_vs_jan25_jan31 <= 10000] {    polygon-fill: #d73027; } #sl_chiefdom_population_2014_merge4 [ jan18_jan24_vs_jan25_jan31 <= 66] {    polygon-fill: #f79272; } #sl_chiefdom_population_2014_merge4 [ jan18_jan24_vs_jan25_jan31 <= 33] {    polygon-fill: #fed6b0; } #sl_chiefdom_population_2014_merge4 [ jan18_jan24_vs_jan25_jan31 <= 0] {    polygon-fill: #fff2cc; } #sl_chiefdom_population_2014_merge4 [ jan18_jan24_vs_jan25_jan31 <= -1] {    polygon-fill: #d2ecb4; } #sl_chiefdom_population_2014_merge4 [ jan18_jan24_vs_jan25_jan31 <= -33] {    polygon-fill: #8cce8a; } #sl_chiefdom_population_2014_merge4 [ jan18_jan24_vs_jan25_jan31 <= -66] {    polygon-fill: #1a9850; }                     #sl_chiefdom_population_2014_merge4::labels {  text-name: [Map label];  text-face-name: 'DejaVu Sans Book';  text-size: 11;  text-label-position-tolerance: 10;  text-fill: #000;  text-halo-fill: #FFF;  text-halo-radius: 1;  text-dy: 0;  text-allow-overlap: false;  text-placement: point;  text-placement-type: simple;}#geoserver_getfeature_1{polygon-fill: #FF6600;  polygon-opacity: 1;  line-color: #FFF; line-width: 0;line-opacity: 1;}"
+			layer.set({cartocss: ""
 			})
 		  };
 		  if(type == 'population') {
-			layer.set({cartocss: "#sl_chiefdom_population_2014_merge4{  polygon-fill: #ECF0F6;  polygon-opacity: 0.6;  line-color: #FFF;  line-width: 1;  line-opacity: 1;}#sl_chiefdom_population_2014_merge4 [ f2014_tota <= 378041] {   polygon-fill: #43618F;}#sl_chiefdom_population_2014_merge4 [ f2014_tota <= 57196] {   polygon-fill: #4E71A6;}#sl_chiefdom_population_2014_merge4 [ f2014_tota <= 38373] {   polygon-fill: #6182B5;}#sl_chiefdom_population_2014_merge4 [ f2014_tota <= 30196] {   polygon-fill: #849EC5;}#sl_chiefdom_population_2014_merge4 [ f2014_tota <= 23640] {   polygon-fill: #9BB0D0;}#sl_chiefdom_population_2014_merge4 [ f2014_tota <= 16340] {   polygon-fill: #B2C2DB;}#sl_chiefdom_population_2014_merge4 [ f2014_tota <= 10650] {   polygon-fill: #ECF0F6;}#sl_chiefdom_population_2014_merge4::labels {  text-name: [Map label];  text-face-name: 'DejaVu Sans Book';  text-size: 11;  text-label-position-tolerance: 10;  text-fill: #000;  text-halo-fill: #FFF;  text-halo-radius: 1;  text-dy: 0;  text-allow-overlap: false;  text-placement: point;  text-placement-type: simple;}"
+			layer.set({cartocss: ""
 			})
 		  };
 		});
@@ -159,7 +188,7 @@
 	type: 'cartodb',
 	sublayers: [{
 	  sql: sqlQuery,
-	  cartocss: "#sl_chiefdom_population_2014_merge4{   polygon-fill: #1a9850;   polygon-opacity: 0.6;   line-color: #FFF;   line-width: 1;   line-opacity: 1; } #sl_chiefdom_population_2014_merge4 [ jan18_jan24_vs_jan25_jan31 <= 10000] {    polygon-fill: #d73027; } #sl_chiefdom_population_2014_merge4 [ jan18_jan24_vs_jan25_jan31 <= 66] {    polygon-fill: #f79272; } #sl_chiefdom_population_2014_merge4 [ jan18_jan24_vs_jan25_jan31 <= 33] {    polygon-fill: #fed6b0; } #sl_chiefdom_population_2014_merge4 [ jan18_jan24_vs_jan25_jan31 <= 0] {    polygon-fill: #fff2cc; } #sl_chiefdom_population_2014_merge4 [ jan18_jan24_vs_jan25_jan31 <= -1] {    polygon-fill: #d2ecb4; } #sl_chiefdom_population_2014_merge4 [ jan18_jan24_vs_jan25_jan31 <= -33] {    polygon-fill: #8cce8a; } #sl_chiefdom_population_2014_merge4 [ jan18_jan24_vs_jan25_jan31 <= -66] {    polygon-fill: #1a9850; }                     #geoserver_getfeature_1 {   polygon-opacity: 1;line-color: #FFF;line-width: 0;line-opacity: 1;}#geoserver_getfeature_1[signal_strength='Excellent           '] {   polygon-fill: #136400;}#geoserver_getfeature_1[signal_strength='Good                '] {   polygon-fill: #b2df8a;}#geoserver_getfeature_1[signal_strength='Moderate            '] {   polygon-fill: #5CA2D1;}#geoserver_getfeature_1[signal_strength='No Service          '] {   polygon-fill: #FF9900;}#geoserver_getfeature_1[signal_strength='Unlikely Service    '] {  polygon-fill: #FF2900;}#geoserver_getfeature_1[signal_strength='Very Good           '] {   polygon-fill: #229A00;}"
+	  cartocss: "#geoserver_getfeature_1[signal_strength='Excellent           '] {   polygon-fill: #136400;}#geoserver_getfeature_1[signal_strength='Good                '] {   polygon-fill: #b2df8a;}#geoserver_getfeature_1[signal_strength='Moderate            '] {   polygon-fill: #5CA2D1;}#geoserver_getfeature_1[signal_strength='No Service          '] {   polygon-fill: #FF9900;}#geoserver_getfeature_1[signal_strength='Unlikely Service    '] {  polygon-fill: #FF2900;}#geoserver_getfeature_1[signal_strength='Very Good           '] {   polygon-fill: #229A00;}"
         }]
 	}
 		  
@@ -176,7 +205,7 @@
 		
 		createSelectorChoropleth(sublayers[0]);
 
-		cdb.vis.Vis.addInfowindow(map, layer.getSubLayer(0), [ 'district', 'chiefdom','signal_strength' ])		 
+		cdb.vis.Vis.addInfowindow(map, layer.getSubLayer(0), [ 'district', 'chiefdom','signal_strength', 'network_type', 'net_name' ])		 
 		
 		var legendCallType = new cdb.geo.ui.Legend({
            type: "custom",
@@ -205,108 +234,7 @@
 		//log the error
 	  });
 	 
-	var layer_init = false ; 
-	var sql_global_type = "SELECT * FROM report_2 where type = 'empty' ";
-	var query = "";
-	
-	//Create call type selector
-	var LayerActions = {
 
-	  death: function(){
-
-		if (death_layer == true){
-  			query = query.replace(/OR type = 'death'/g,'');
-  			sublayers[1].setSQL(sql_global_type + query);
-  			$('.button.death').removeClass('selected');
-  			removelayer == "";
-  			death_layer = false;
-  		}else{
-  			query = query + " OR type = 'death' ";
-	  		sublayers[1].setSQL(sql_global_type + query);
-	  		death_layer = true ;
-		}	
-		
-		return death_layer;
-		
-	  },
-	  sick: function(){
-	
-	if (sick_layer == true){
-  			query = query.replace(/OR type = 'sick'/g,'');
-  			sublayers[1].setSQL(sql_global_type + query);
-  			$('.button.sick').removeClass('selected');
-  			removelayer == "";
-  			sick_layer = false;
-  		}else{
-  			query = query + " OR type = 'sick' ";
-	  		sublayers[1].setSQL(sql_global_type + query);
-	  		sick_layer = true ;
-		}	
-		return sick_layer;
-	
-	  },
-	  suspect: function(){
-		
-		if (suspect_layer == true){
-  			query = query.replace(/OR type = 'suspect'/g,'');
-  			sublayers[1].setSQL(sql_global_type + query);
-  			$('.button.suspect').removeClass('selected');
-  			removelayer == "";
-  			suspect_layer = false;
-  		}else{
-  			query = query + " OR type = 'suspect' ";
-	  		sublayers[1].setSQL(sql_global_type + query);
-			suspect_layer = true ;
-		}
-		
-		return suspect_layer;
-		
-	  },
-	  quarantine: function(){
-	
-		if (quarantine_layer == true){
-  			query = query.replace(/OR type = 'quarantine'/g,'');
-  			sublayers[1].setSQL(sql_global_type + query);
-  			$('.button.quarantine').removeClass('selected');
-  			removelayer == "";
-  			quarantine_layer = false;
-  		}else{
-  			query = query + " OR type = 'quarantine' ";
-	  		sublayers[1].setSQL(sql_global_type + query);
-			quarantine_layer = true ;
-		}
-		
-		return quarantine_layer;
-		
-	  }
-	}	  
-	$('.button').click(function() {
-	  $(this).addClass('selected');
-	  LayerActions[$(this).attr('id')]();
-	});
-	
-var removelayer = "";
-var sick_layer = false;
-var quarantine_layer = false;
-var suspect_layer = false;
-var death_layer = false;
-
-var checkclick = function() {
-  if (quarantine_layer == true){
-   removelayer = "quarantine";   
-  }
-  if (sick_layer == true){
-   removelayer = "sick";   
-  }
-  if (suspect_layer == true){
-   removelayer = "suspect";   
-  }
-  if (death_layer == true){
-   removelayer = "death";   
-  }
-};
-
-$('.button').bind( "click", checkclick );
 	
   }
   </script>
@@ -327,10 +255,47 @@ $('.button').bind( "click", checkclick );
 		<div>
 		<select style="width:125px;" tabindex="2">	
 				<option value="all" selected>All</option>
+								<option value="Bo                                                          ">Bo</option>
+												<option value="Bombali                                                     ">Bombali</option>
+												<option value="Bonthe                                                      ">Bonthe</option>	
+												<option value="Kailahun                                                    ">Kailahun</option>		
+<option value="Kambia                                                      ">Kambia</option>																																			
 				<option value="Kenema                                                      ">Kenema</option>
+				<option value="Koinadugu                                                   ">Koinadugu</option>				
+				<option value="Kono                                                        ">Kono</option>
+				<option value="Moyamba                                                     ">Moyamba</option>		
+				<option value="Port Loko                                                   ">Port Loko</option>
+								<option value="Pujehun                                                     ">Pujehun</option>
+																<option value="Tonkolili                                                   ">Tonkolili</option>	
+																<option value="Western Area Rural                                          ">Western Area Rural</option>
+																<option value="Western Area Urban                                          ">Western Area Urban										</option>																
+		</select>
+  <br>
+
+		<div id="network_provider">
+		<div id="Select-Title2">Network provider</div>
+		<div>
+		<select style="width:80px;" >	
+				<option value="all2" selected>All</option>
+				<option value="Africell">Africell</option>
+				<option value="Airtel">Airtel</option>
+				<option value="Smart">Smart</option>
+				<option value="Unknown">Unknown</option>
+		</select>
+  <br>
+
+		<div id="network_type">
+		<div id="Select-Title3">Network type</div>
+		<div>
+		<select style="width:55px;" >	
+				<option value="all3" selected>All</option>
+				<option value="2G                  ">2G</option>
+				<option value="3G                  ">3G</option>
+				<option value="4G                  ">4G</option>
 		</select>
 
-		</div>	  
+		</div>
+		</div>		  
 	</div>
     </td>
     <td width="" height="100%">	  
