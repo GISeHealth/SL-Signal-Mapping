@@ -150,9 +150,9 @@
 	  layer.setSQL(query);
 
 	  // update the map view extent
-		var queryBounds = sql.getBounds(query).done(function(bounds) {
+		/*var queryBounds = sql.getBounds(query).done(function(bounds) {
 				map.fitBounds(bounds);
-		});
+		});*/
 	});
   
   
@@ -205,7 +205,7 @@
 		
 		createSelectorChoropleth(sublayers[0]);
 
-		cdb.vis.Vis.addInfowindow(map, layer.getSubLayer(0), [ 'district', 'chiefdom','signal_strength', 'network_type', 'net_name' ])		 
+		/*cdb.vis.Vis.addInfowindow(map, layer.getSubLayer(0), [ 'district', 'chiefdom','signal_strength', 'network_type', 'net_name' ])		*/ 
 		
 		var legendCallType = new cdb.geo.ui.Legend({
            type: "custom",
