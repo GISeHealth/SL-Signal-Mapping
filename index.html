@@ -104,7 +104,7 @@
 	var sublayers = [];
 	var previous_area;
 
-	var sqlQuery = "SELECT network_type, net_name, signal_strength, district_name as province, district_name as f2014_Fema, district_name as f2014_Male, district_name as f2014_Tota, district_name as jan18_jan24, district_name as jan25_jan31, district_name, district_name as district, chiefdom_name as chiefdom, district_name AS \"Map label\", district_name AS jan18_jan24_vs_jan25_jan31, cartodb_id, the_geom, the_geom_webmercator FROM geoserver_getfeature_1";
+	var sqlQuery = "SELECT dbm_signal_strength,gsm_asu, province_name, network_type, net_name, signal_strength, district_name as province, district_name as f2014_Fema, district_name as f2014_Male, district_name as f2014_Tota, district_name as jan18_jan24, district_name as jan25_jan31, district_name, district_name as district, chiefdom_name as chiefdom, district_name AS \"Map label\", district_name AS jan18_jan24_vs_jan25_jan31, cartodb_id, the_geom, the_geom_webmercator FROM geoserver_getfeature_1";
 	
   // create district selector
   function createSelectorDistrict(layer) {
@@ -244,8 +244,7 @@
 		
 		createSelectorChoropleth(sublayers[0]);
 
-		cdb.vis.Vis.addInfowindow(map, layer.getSubLayer(0), [ 'district', 'chiefdom','signal_strength', 'network_type', 'net_name' ])	
-		
+		cdb.vis.Vis.addInfowindow(map, layer.getSubLayer(0), [ 'district', 'chiefdom','signal_strength', 'network_type', 'net_name', 'province_name', 'dbm_signal_strength','gsm_asu'  ])	
 
 			
 		
