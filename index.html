@@ -109,17 +109,15 @@
   function createSelectorDistrict(layer) {
 	var sql = new cartodb.SQL({ user: 'ehealthafrica' });
 	var $options = $('#layer_selector');
-	var $options2 = $('#signal_strength');
-	var $options3 = $('#network_type');
-	
+
 	$options.change(function(e) {
 
 	  // get the area of the selected layer
 	  var $li = $(e.target);
 	  var area = $('#layer_selector').find(":selected").val();
-
-      var nprov = $('#signal_strength').find(":selected").val();
+      var nprov = $('#network_provider').find(":selected").val();
       var ntype = $('#network_type').find(":selected").val();
+      var signal = $('#signal_strength	').find(":selected").val();
       
 	  // deselect all and select the clicked one
 	  $options.removeClass('selected');
@@ -127,27 +125,48 @@
 	  // create query based on data from the layer
 	  var query = sqlQuery  ;
 
-	  if(area !== 'all' && nprov == 'all2' && ntype == 'all3') {
+	  if(area !== 'all' && nprov == 'all2' && ntype == 'all3' && signal == 'all_signal') {
 		query = query + " where district_name = '" + area + "'";
 	  }
-	  if(nprov !== 'all2' && area == 'all' && ntype == 'all3') {
-		query = query + " where signal_strength = '" + nprov + "'";
+	  if(nprov !== 'all2' && area == 'all' && ntype == 'all3' && signal == 'all_signal') {
+		query = query + " where net_name = '" + nprov + "'";
 	  }
-	  if(ntype !== 'all3' && area == 'all' && nprov =='all2') {
+	  if(ntype !== 'all3' && area == 'all' && nprov =='all2' && signal == 'all_signal') {
 		query = query + " where network_type = '" + ntype + "'";
 	  }	  
-	  if(area !== 'all' && nprov !== 'all2' && ntype == 'all3') {
-		query = query + " where district_name = '" + area + "' AND signal_strength = '" + nprov + "'";
+	  if(signal !== 'all_signal' && ntype == 'all3' && area == 'all' && nprov =='all2') {
+		query = query + " where signal_strength = '" + signal + "'";
+	  }	
+	  if(area !== 'all' && nprov !== 'all2' && ntype == 'all3' && signal == 'all_signal') {
+		query = query + " where district_name = '" + area + "' AND net_name = '" + nprov + "'";
 	  }
-	  if(area !== 'all' && ntype !== 'all3' && nprov == 'all2') {
-		query = query + " where district_name = '" + area + "' AND network_type = '" + ntype + "'";			
+	  	  if(area !== 'all' && nprov == 'all2' && ntype == 'all3' && signal !== 'all_signal') {
+		query = query + " where district_name = '" + area + "' AND signal_strength = '" + signal + "'";
+	  }
+	  if(area !== 'all' && ntype !== 'all3' && nprov == 'all2' && signal == 'all_signal') {
+		query = query + " where district_name = '" + area + "' AND network_type = '" + ntype + "'";
 		}
-	  if(area == 'all' && nprov !== 'all2' && ntype !== 'all3') {
-		query = query + " where signal_strength = '" + nprov + "' AND network_type = '" + ntype + "'";
+	  if(area == 'all' && nprov !== 'all2' && ntype !== 'all3' && signal == 'all_signal') {
+		query = query + " where net_name = '" + nprov + "' AND network_type = '" + ntype + "'";
 	  }
-	  if(area !== 'all' && nprov !== 'all2' && ntype !== 'all3') {
-		query = query + " where district_name = '" + area + "' AND signal_strength = '" + nprov + "' AND network_type = '" + ntype + "'";
+	  if(area !== 'all' && nprov !== 'all2' && ntype !== 'all3' && signal == 'all_signal') {
+		query = query + " where district_name = '" + area + "' AND net_name = '" + nprov + "' AND network_type = '" + ntype + "'";
 	  }
+	  	  if(area !== 'all' && nprov !== 'all2' && ntype == 'all3' && signal !== 'all_signal') {
+		query = query + " where district_name = '" + area + "' AND net_name = '" + nprov + "' AND signal_strength = '" + signal + "'";
+		}
+		  	  if(area !== 'all' && nprov == 'all2' && ntype !== 'all3' && signal !== 'all_signal') {
+		query = query + " where district_name = '" + area + "' AND network_type = '" + ntype + "' AND signal_strength = '" + signal + "'";	
+		
+	  }
+	  		 if(area == 'all' && nprov !== 'all2' && ntype !== 'all3' && signal !== 'all_signal') {
+		query = query + " where net_name = '" + nprov + "' AND network_type = '" + ntype + "' AND signal_strength = '" + signal + "'";	
+		
+	  }  
+	  	  if(area !== 'all' && nprov !== 'all2' && ntype !== 'all3' && signal !== 'all_signal') {
+		query = query + " where district_name = '" + area + "' AND net_name = '" + nprov + "' AND network_type = '" + ntype + "' AND signal_strength = '" + signal + "'";
+	  }
+	  
 
 	  // change the query in the layer to update the map
 	  layer.setSQL(query);
@@ -295,12 +314,23 @@
 		<div id="Select-Title_signal">Signal Strength</div>
 		<div>
 		<select style="width:100px;" >	
-				<option value="all2" selected>All</option>
+				<option value="all_signal" selected>All</option>
 				<option value="Excellent           ">Excellent</option>
 				<option value="Very Good           ">Very Good</option>
 				<option value="Good                ">Good</option>
-				<option value="No Service          ">No Service</option>
-				<option value="Unlikely Service    ">Unlikely Service</option>							
+				<option value="Moderate            ">Moderate</option>
+		</select>
+  <br>
+  
+		<div id="network_provider">
+		<div id="Select-Title2">Network provider</div>
+		<div>
+		<select style="width:80px;" >	
+				<option value="all2" selected>All</option>
+				<option value="Africell">Africell</option>
+				<option value="Airtel">Airtel</option>
+				<option value="Smart">Smart</option>
+				<option value="Unknown">Unknown</option>
 		</select>
   <br>
 
