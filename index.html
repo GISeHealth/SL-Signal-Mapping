@@ -189,8 +189,16 @@
 	sublayers: [{
 	  sql: sqlQuery,
 	  cartocss: "#geoserver_getfeature_1[signal_strength='Excellent           '] {   polygon-fill: #136400;}#geoserver_getfeature_1[signal_strength='Good                '] {   polygon-fill: #b2df8a;}#geoserver_getfeature_1[signal_strength='Moderate            '] {   polygon-fill: #5CA2D1;}#geoserver_getfeature_1[signal_strength='No Service          '] {   polygon-fill: #FF9900;}#geoserver_getfeature_1[signal_strength='Unlikely Service    '] {  polygon-fill: #FF2900;}#geoserver_getfeature_1[signal_strength='Very Good           '] {   polygon-fill: #229A00;}"
-        }]
+        },{
+	  sql: "SELECT * FROM sl_districts",
+	  cartocss: "#sl_districts{  polygon-fill: #FF6600;polygon-opacity: 0;line-color: #FFF;line-width: 2;line-opacity: 1;}#sl_districts::labels {text-name: [district_name];text-face-name: 'DejaVu Sans Book';text-size: 20;text-label-position-tolerance: 10;text-fill: #000;text-halo-fill: #FFF;text-halo-radius: 1.5;text-dy: -10;text-allow-overlap: false;text-placement: point;text-placement-type: simple;}"
+	},{
+	  sql: "SELECT * FROM sl_chiefdoms",
+	  cartocss: "#sl_chiefdoms{polygon-fill: #b5ada7;polygon-opacity: 0;line-color: #FFF;line-width: 0.5;line-opacity: 1;}#sl_chiefdoms::labels {text-name: [chiefdom_name];text-face-name: 'DejaVu Sans Book';text-size: 10;text-label-position-tolerance: 10;text-fill: #000;text-halo-fill: #FFF;text-halo-radius: 1.5;text-dy: -10;text-allow-overlap: false;text-placement: point;text-placement-type: simple;}"
+	}]
 	}
+	
+	
 		  
 	cartodb.createLayer(map, layerSource)
 	  .addTo(map)
