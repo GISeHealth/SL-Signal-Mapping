@@ -7,6 +7,7 @@
   <script src='jquery-1.11.0.min.js'></script>
    <link rel="stylesheet" type="text/css" href="styles.css" media="all" />
     <link rel="stylesheet" href="iThing.css" type="text/css" />
+        <link rel="stylesheet" href="http://libs.cartocdn.com/cartodb.js/v3/themes/css/cartodb.css" />
   <style>
     html, body {width:100%; height:100%; padding: 0; margin: 0;}
     #map { width: 100%; height:100%; background: black;}
@@ -243,7 +244,10 @@
 		
 		createSelectorChoropleth(sublayers[0]);
 
-		cdb.vis.Vis.addInfowindow(map, layer.getSubLayer(0), [ 'district', 'chiefdom','signal_strength', 'network_type', 'net_name' ])		
+		cdb.vis.Vis.addInfowindow(map, layer.getSubLayer(0), [ 'district', 'chiefdom','signal_strength', 'network_type', 'net_name' ])	
+		
+
+			
 		
 		var legendCallType = new cdb.geo.ui.Legend({
            type: "custom",
@@ -352,6 +356,22 @@
 	  <div id='map'></div>
 	   <div id='menu'>
 	  </div>
+	  
+	  <script type="infowindow/html" id="infowindow_template">
+      <span> custom </span>
+      <div class="cartodb-popup">
+        <a href="#close" class="cartodb-popup-close-button close">x</a>
+         <div class="cartodb-popup-content-wrapper">
+           <div class="cartodb-popup-content">
+             <img style="width: 100%" src="http://rambo.webcindario.com/images/18447755.jpg">
+             <!-- content.data contains the field info -->
+             <h4>{{signal_strength}}</h4>
+           </div>
+         </div>
+         <div class="cartodb-popup-tip-container"></div>
+      </div>
+    </script>
+	  
 	</td>
   </tr>
 </table>
