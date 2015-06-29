@@ -111,7 +111,7 @@
 	var $options2 = $('#network_provider');
 	var $options3 = $('#network_type');
 	
-	$options.click(function(e) {
+	$options.change(function(e) {
 	  // get the area of the selected layer
 	  var $li = $(e.target);
 	  var area = $('#layer_selector').find(":selected").val();
@@ -205,7 +205,7 @@
 		
 		createSelectorChoropleth(sublayers[0]);
 
-		/*cdb.vis.Vis.addInfowindow(map, layer.getSubLayer(0), [ 'district', 'chiefdom','signal_strength', 'network_type', 'net_name' ])		*/ 
+		cdb.vis.Vis.addInfowindow(map, layer.getSubLayer(0), [ 'district', 'chiefdom','signal_strength', 'network_type', 'net_name' ])		
 		
 		var legendCallType = new cdb.geo.ui.Legend({
            type: "custom",
