@@ -143,7 +143,9 @@
 
 	var sublayers = [];
 	var previous_area = 'all';
-
+	var previous_signal = 'all_signal';
+	var previous_net_type = 'all_net_type';
+	
 	var sqlQuery = "SELECT dbm_signal_strength,gsm_asu, province_name, network_type, net_name, signal_strength, district_name as district, chiefdom_name as chiefdom, cartodb_id, the_geom, the_geom_webmercator FROM geoserver_getfeature_1 where mcc = 'sl'";
 	
 	var query = sqlQuery;
@@ -153,8 +155,8 @@
   function createSelectorDistrict(layer) {
 	var sql = new cartodb.SQL({ user: 'ehealthafrica' });
 	var $options = $('#layer_selector');
-	var $option_sig = $('#signal');
-	var $option_net_type = $('#net_type');
+	var $option_sig = $('#signal li');
+	var $option_net_type = $('#net_type li');
 
 	
 	$options.change(function(e) {
@@ -162,8 +164,7 @@
 	  // get the area of the selected layer
 	  var $li = $(e.target);
 	  var area = $('#layer_selector').find(":selected").val();
-      var ntype = $('#network_type').find(":selected").val();
-      var signal = $('#signal_strength	').find(":selected").val();
+
       
 	  // deselect all and select the clicked one
 	  $options.removeClass('selected');
@@ -178,7 +179,7 @@
 		query = query + " AND district_name = '" + area + "'";
 	  }
 	  if(area == 'all') {
-	  	text_replace_area = " AND district_name = '" + previous_area + "'"
+	  	text_replace_area = " AND district_name = '" + previous_area + "'";
 	  	query = query.replace(text_replace_area,'');
 	  }	  
 
@@ -204,20 +205,49 @@
    var $li = $(e.target);
    var signal = $li.attr('data'); 
 
-  		  	query = query + " AND signal_strength = '" + signal + "'";
+     $option_sig.removeClass('selected');
+	  $li.addClass('selected');
+
+	if (signal != 'all_signal'){
+	  	text_replace_signal = " AND signal_strength = '" + previous_signal + "'";
+	  	query = query.replace(text_replace_signal,'');
+		query = query + " AND signal_strength = '" + signal + "'";
+	  }else{
+	  	text_replace_signal = " AND signal_strength = '" + previous_signal + "'";
+	  	query = query.replace(text_replace_signal,'');
+	  }
   			layer.setSQL(query);
+  	
+  	previous_signal = signal ;
 
 
   });
+  
   
   
   $option_net_type.click(function(e) {  
      var $li = $(e.target);
      var net_type = $li.attr('data');
      
-     		query = query + " AND network_type = '" + net_type + "'";
-  			layer.setSQL(query);
-  			alert(query);
+     $option_net_type.removeClass('selected');
+	  $li.addClass('selected');
+	  
+	  
+	  if (net_type != 'all_net_type'){
+	  	text_replace_net_type = " AND network_type = '" + previous_net_type + "'";
+	  	query = query.replace(text_replace_net_type,'');
+		query = query + " AND network_type = '" + net_type + "'";
+	  }else{
+	  	text_replace_net_type = " AND network_type = '" + previous_net_type + "'";
+	  	query = query.replace(text_replace_net_type,'');
+	  }
+  			
+  	
+  	layer.setSQL(query);
+  	
+  	previous_net_type = net_type ;
+
+
 
   });
   
@@ -430,6 +460,7 @@ $('.button').bind( "click", checkclick );
 <br>
 		<div id="signal" class="cartodb-infobox">
 		  <ul>
+		  	<li data="all_signal" selected>All Signal</li>
 		  	<li data="Excellent           ">Excellent</li>
 		  	<li data="Very Good           ">Very Good</li>
 		  	<li data="Good                ">Good</li>
@@ -454,6 +485,7 @@ $('.button').bind( "click", checkclick );
 
 		<div id="net_type" class="cartodb-infobox">
 		  <ul>
+		  	<li data="all_net_type" selected>All network</li>
 		  	<li data="2G                  ">2G</li>
 			<li data="3G                  ">3G</li>
 			<li data="4G                  ">4G</li>
