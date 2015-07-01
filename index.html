@@ -345,16 +345,36 @@
 	  smart: function(layer){
 
 		if (smart_layer == true){
-			query = query.replace(/AND net_name = 'Smart'/g,'');
+			query = query.replace(/ net_name = 'Smart' /g,'');
+			query = query.replace(/\(  OR /g,'(');
+			query = query.replace(/\( OR /g,'(');
+			query = query.replace(/OR \)/g,')');
+			query = query.replace(/\(  AND \)/g,'');
+			query = query.replace(/OR  OR/g,'OR');
   			$('.button.smart').removeClass('selected');
   			removelayer == "";
   			smart_layer = false;
-  			layer.setSQL(query);
+
+  			numb_butt_select = numb_butt_select - 1 ;
+
+  			if (numb_butt_select == 0){
+				query = query.replace(/ AND \(/g,'');
+				query = query.replace(/\)/g,'');
+  		  	}
+  		  	
+  		  	layer.setSQL(query);
 
   		}else{
-  		  	query = query + " AND net_name = 'Smart'";
+  		if (numb_butt_select == 0){
+  		  	query = query + " AND ( net_name = 'Smart' )";
+  		  	}
+  		  else {
+  		    query = query.replace(/\)/g,' OR ');
+  		    query = query + " net_name = 'Smart' )";
+  		     }
   			layer.setSQL(query);
 			smart_layer = true ;
+			numb_butt_select = numb_butt_select + 1 ;
 		}
 		
 		return smart_layer;
@@ -363,16 +383,36 @@
 	  africell: function(layer){
 	
 		if (africell_layer == true){
-		  	query = query.replace(/AND net_name = 'Africell'/g,'');
+			query = query.replace(/ net_name = 'Africell' /g,'');
+			query = query.replace(/\(  OR /g,'(');
+			query = query.replace(/\( OR /g,'(');
+			query = query.replace(/OR \)/g,')');
+			query = query.replace(/\(  AND \)/g,'');
+			query = query.replace(/OR  OR/g,'OR');
   			$('.button.africell').removeClass('selected');
   			removelayer == "";
   			africell_layer = false;
-  			layer.setSQL(query);
+
+  			numb_butt_select = numb_butt_select - 1 ;
+  			
+  			if (numb_butt_select == 0){
+				query = query.replace(/ AND \(/g,'');
+				query = query.replace(/\)/g,'');
+  		  	}
+  		  	
+  		  	layer.setSQL(query);
 
   		}else{
-  		  	query = query + " AND net_name = 'Africell'";
+  		if (numb_butt_select == 0){
+  		  	query = query + " AND ( net_name = 'Africell' )";
+  		  	}
+  		  else {
+  		  query = query.replace(/\)/g,' OR ');
+  		  query = query + " net_name = 'Africell' )";
+  		  }
   			layer.setSQL(query);
 			africell_layer = true ;
+			numb_butt_select = numb_butt_select + 1 ;
 		}
 		
 		return africell_layer;
@@ -382,16 +422,36 @@
 	  airtel: function(layer){
 		
 		if (airtel_layer == true){
-			query = query.replace(/AND net_name = 'Airtel'/g,'');
+			query = query.replace(/ net_name = 'Airtel' /g,'');
+			query = query.replace(/\(  OR /g,'(');	
+			query = query.replace(/\( OR /g,'(');
+			query = query.replace(/OR \)/g,')');
+			query = query.replace(/\(  AND \)/g,'');	
+			query = query.replace(/OR  OR/g,'OR');
   			$('.button.airtel').removeClass('selected');
   			removelayer == "";
   			airtel_layer = false;
+
+  			numb_butt_select = numb_butt_select - 1 ;
+  			
+  			if (numb_butt_select == 0){
+				query = query.replace(/ AND \(/g,'');
+				query = query.replace(/\)/g,'');
+  		  	}
+
   			layer.setSQL(query);
 
   		}else{
-  		  	query = query + " AND net_name = 'Airtel'";
+  		if (numb_butt_select == 0){
+  		  	query = query + " AND ( net_name = 'Airtel' )";
+  		  	 }
+  		  else {
+		  query = query.replace(/\)/g,' OR ');
+  		  query = query + " net_name = 'Airtel' )";
+  		  }
   			layer.setSQL(query);
 			airtel_layer = true ;
+			numb_butt_select = numb_butt_select + 1 ;
 		}
 		
 		return airtel_layer;
@@ -409,6 +469,7 @@
 	var africell_layer = false;
 	var airtel_layer = false;
 	var smart_layer = false;
+	var numb_butt_select = 0;
 	
 	var checkclick = function() {
   if (africell_layer == true){
@@ -460,7 +521,7 @@ $('.button').bind( "click", checkclick );
 <br>
 		<div id="signal" class="cartodb-infobox">
 		  <ul>
-		  	<li data="all_signal" selected>All Signal</li>
+		  	<li data="all_signal" class="selected">All Signal</li>
 		  	<li data="Excellent           ">Excellent</li>
 		  	<li data="Very Good           ">Very Good</li>
 		  	<li data="Good                ">Good</li>
@@ -485,7 +546,7 @@ $('.button').bind( "click", checkclick );
 
 		<div id="net_type" class="cartodb-infobox">
 		  <ul>
-		  	<li data="all_net_type" selected>All network</li>
+		  	<li data="all_net_type" class="selected">All network</li>
 		  	<li data="2G                  ">2G</li>
 			<li data="3G                  ">3G</li>
 			<li data="4G                  ">4G</li>
