@@ -11,7 +11,7 @@
   <style>
     html, body {width:100%; height:100%; padding: 0; margin: 0;}
     #map { width: 100%; height:100%; background: black;}
-    #menu { position: absolute; top: 95px; right: 300px; width: 500px; height:60px; background: transparent; z-index:10;}
+    #menu { position: absolute; top: 15px; right: 400px; width: 500px; height:60px; background: transparent; z-index:10;}
     #menu a { 
       margin: 15px 10px 0 0;
       float: right;
@@ -34,7 +34,7 @@
 	
 	  #layer_selector {
         position: absolute;
-        top: 110px;
+        top: 15px;
         left: 15px;
         padding: 0;
       }
@@ -102,9 +102,12 @@
     }).addTo(map);
 
 	var sublayers = [];
-	var previous_area;
+	var previous_area = 'all';
 
-	var sqlQuery = "SELECT dbm_signal_strength,gsm_asu, province_name, network_type, net_name, signal_strength, district_name as province, district_name as f2014_Fema, district_name as f2014_Male, district_name as f2014_Tota, district_name as jan18_jan24, district_name as jan25_jan31, district_name, district_name as district, chiefdom_name as chiefdom, district_name AS \"Map label\", district_name AS jan18_jan24_vs_jan25_jan31, cartodb_id, the_geom, the_geom_webmercator FROM geoserver_getfeature_1";
+	var sqlQuery = "SELECT dbm_signal_strength,gsm_asu, province_name, network_type, net_name, signal_strength, district_name as district, chiefdom_name as chiefdom, cartodb_id, the_geom, the_geom_webmercator FROM geoserver_getfeature_1 where mcc = 'sl'";
+	
+	var query = sqlQuery;
+	var text_replace_area ;
 	
   // create district selector
   function createSelectorDistrict(layer) {
@@ -116,7 +119,6 @@
 	  // get the area of the selected layer
 	  var $li = $(e.target);
 	  var area = $('#layer_selector').find(":selected").val();
-      var nprov = $('#network_provider').find(":selected").val();
       var ntype = $('#network_type').find(":selected").val();
       var signal = $('#signal_strength	').find(":selected").val();
       
@@ -124,50 +126,18 @@
 	  $options.removeClass('selected');
 	  $li.addClass('selected');
 	  // create query based on data from the layer
-	  var query = sqlQuery  ;
 
-	  if(area !== 'all' && nprov == 'all2' && ntype == 'all3' && signal == 'all_signal') {
-		query = query + " where district_name = '" + area + "'";
+	  if(area !== 'all') {
+	  if (previous_area != 'all'){
+	  	text_replace_area = " AND district_name = '" + previous_area + "'";
+	  	query = query.replace(text_replace_area,'');
+	  		  	}
+		query = query + " AND district_name = '" + area + "'";
 	  }
-	  if(nprov !== 'all2' && area == 'all' && ntype == 'all3' && signal == 'all_signal') {
-		query = query + " where net_name = '" + nprov + "'";
-	  }
-	  if(ntype !== 'all3' && area == 'all' && nprov =='all2' && signal == 'all_signal') {
-		query = query + " where network_type = '" + ntype + "'";
+	  if(area == 'all') {
+	  	text_replace_area = " AND district_name = '" + previous_area + "'"
+	  	query = query.replace(text_replace_area,'');
 	  }	  
-	  if(signal !== 'all_signal' && ntype == 'all3' && area == 'all' && nprov =='all2') {
-		query = query + " where signal_strength = '" + signal + "'";
-	  }	
-	  if(area !== 'all' && nprov !== 'all2' && ntype == 'all3' && signal == 'all_signal') {
-		query = query + " where district_name = '" + area + "' AND net_name = '" + nprov + "'";
-	  }
-	  	  if(area !== 'all' && nprov == 'all2' && ntype == 'all3' && signal !== 'all_signal') {
-		query = query + " where district_name = '" + area + "' AND signal_strength = '" + signal + "'";
-	  }
-	  if(area !== 'all' && ntype !== 'all3' && nprov == 'all2' && signal == 'all_signal') {
-		query = query + " where district_name = '" + area + "' AND network_type = '" + ntype + "'";
-		}
-	  if(area == 'all' && nprov !== 'all2' && ntype !== 'all3' && signal == 'all_signal') {
-		query = query + " where net_name = '" + nprov + "' AND network_type = '" + ntype + "'";
-	  }
-	  if(area !== 'all' && nprov !== 'all2' && ntype !== 'all3' && signal == 'all_signal') {
-		query = query + " where district_name = '" + area + "' AND net_name = '" + nprov + "' AND network_type = '" + ntype + "'";
-	  }
-	  	  if(area !== 'all' && nprov !== 'all2' && ntype == 'all3' && signal !== 'all_signal') {
-		query = query + " where district_name = '" + area + "' AND net_name = '" + nprov + "' AND signal_strength = '" + signal + "'";
-		}
-		  	  if(area !== 'all' && nprov == 'all2' && ntype !== 'all3' && signal !== 'all_signal') {
-		query = query + " where district_name = '" + area + "' AND network_type = '" + ntype + "' AND signal_strength = '" + signal + "'";	
-		
-	  }
-	  		 if(area == 'all' && nprov !== 'all2' && ntype !== 'all3' && signal !== 'all_signal') {
-		query = query + " where net_name = '" + nprov + "' AND network_type = '" + ntype + "' AND signal_strength = '" + signal + "'";	
-		
-	  }  
-	  	  if(area !== 'all' && nprov !== 'all2' && ntype !== 'all3' && signal !== 'all_signal') {
-		query = query + " where district_name = '" + area + "' AND net_name = '" + nprov + "' AND network_type = '" + ntype + "' AND signal_strength = '" + signal + "'";
-	  }
-	  
 
 	  // change the query in the layer to update the map
 	  layer.setSQL(query);
@@ -276,6 +246,90 @@
 	  });
 	 
 
+	//Create call type selector
+	var LayerActions = {
+
+	
+	  smart: function(layer){
+
+		if (smart_layer == true){
+			query = query.replace(/AND net_name = 'Smart'/g,'');
+  			$('.button.smart').removeClass('selected');
+  			removelayer == "";
+  			smart_layer = false;
+  			layer.setSQL(query);
+
+  		}else{
+  		  	query = query + " AND net_name = 'Smart'";
+  			layer.setSQL(query);
+			smart_layer = true ;
+		}
+		
+		return smart_layer;
+		
+	  },
+	  africell: function(layer){
+	
+		if (africell_layer == true){
+		  	query = query.replace(/AND net_name = 'Africell'/g,'');
+  			$('.button.africell').removeClass('selected');
+  			removelayer == "";
+  			africell_layer = false;
+  			layer.setSQL(query);
+
+  		}else{
+  		  	query = query + " AND net_name = 'Africell'";
+  			layer.setSQL(query);
+			africell_layer = true ;
+		}
+		
+		return africell_layer;
+		
+		
+	  },
+	  airtel: function(layer){
+		
+		if (airtel_layer == true){
+			query = query.replace(/AND net_name = 'Airtel'/g,'');
+  			$('.button.airtel').removeClass('selected');
+  			removelayer == "";
+  			airtel_layer = false;
+  			layer.setSQL(query);
+
+  		}else{
+  		  	query = query + " AND net_name = 'Airtel'";
+  			layer.setSQL(query);
+			airtel_layer = true ;
+		}
+		
+		return airtel_layer;
+		
+	  }
+	}	  
+	$('.button').click(function() {
+	  $(this).addClass('selected');
+	  LayerActions[$(this).attr('id')](sublayers[0]);
+	});
+
+
+	var removelayer = "";
+	var africell_layer = false;
+	var airtel_layer = false;
+	var smart_layer = false;
+	
+	var checkclick = function() {
+  if (africell_layer == true){
+   removelayer = "africell";   
+  }
+  if (airtel_layer == true){
+   removelayer = "airtel";   
+  }
+  if (smart_layer == true){
+   removelayer = "smart";   
+  }
+};
+$('.button').bind( "click", checkclick );
+
 	
   }
   </script>
@@ -283,10 +337,7 @@
 <body onload="init()">
  <table border=0 width="100%" height="90%" celpadding=5>
   <tr>
-	<td colspan=2 class="headerbar">
-	  <img src="http://ehealthafrica.org/wp-content/uploads/styx/1345117248_eHealth_logo_h96.png" height=48>
-	  <img src="http://www.netfuse.net/images/logo.png" style="float:right">
-	</td>
+
   </tr>  
   <tr>
 	<td width="160" rowspan=2 valign=top>
@@ -294,7 +345,7 @@
 		<div id="layer_selector" class="cartodb-infobox">
 		<div id="Select-Title"><h7>Choose a District</h7></div>
 		<div>
-		<select style="width:125px;" tabindex="2">	
+		<select style="width:140px;" tabindex="2">	
 				<option value="all" selected>All</option>
 								<option value="Bo                                                          ">Bo</option>
 												<option value="Bombali                                                     ">Bombali</option>
@@ -311,64 +362,21 @@
 																<option value="Western Area Rural                                          ">Western Area Rural</option>
 																<option value="Western Area Urban                                          ">Western Area Urban										</option>																
 		</select>
-  <br>
-  
-<div id="signal_strength">
-		<div id="Select-Title_signal">Signal Strength</div>
-		<div>
-		<select style="width:100px;" >	
-				<option value="all_signal" selected>All</option>
-				<option value="Excellent           ">Excellent</option>
-				<option value="Very Good           ">Very Good</option>
-				<option value="Good                ">Good</option>
-				<option value="Moderate            ">Moderate</option>
-		</select>
-  <br>
-  
-		<div id="network_provider">
-		<div id="Select-Title2">Network provider</div>
-		<div>
-		<select style="width:80px;" >	
-				<option value="all2" selected>All</option>
-				<option value="Africell">Africell</option>
-				<option value="Airtel">Airtel</option>
-				<option value="Smart">Smart</option>
-				<option value="Unknown">Unknown</option>
-		</select>
-  <br>
-
-		<div id="network_type">
-		<div id="Select-Title3">Network type</div>
-		<div>
-		<select style="width:55px;" >	
-				<option value="all3" selected>All</option>
-				<option value="2G                  ">2G</option>
-				<option value="3G                  ">3G</option>
-				<option value="4G                  ">4G</option>
-		</select>
 
 		</div>
 		</div>		  
 	</div>
     </td>
-    <td width="" height="100%">	  
+    <td width="" height="100%">	
+ 
 	  <div id='map'></div>
-	   <div id='menu'>
-	  </div>
+	
+      <div id='menu'>
+		<a href="#smart" id="smart" class="button smart">Smart</a> 
+		<a href="#africell" id="africell" class="button africell">Africell</a> 
+		<a href="#airtel" id="airtel" class="button airtel">Airtel</a>
+	  </div> 
 	  
-	  <script type="infowindow/html" id="infowindow_template">
-      <span> custom </span>
-      <div class="cartodb-popup">
-        <a href="#close" class="cartodb-popup-close-button close">x</a>
-         <div class="cartodb-popup-content-wrapper">
-           <div class="cartodb-popup-content">
-             <img style="width: 100%" src="http://rambo.webcindario.com/images/18447755.jpg">
-             <!-- content.data contains the field info -->
-             <h4>{{signal_strength}}</h4>
-           </div>
-         </div>
-         <div class="cartodb-popup-tip-container"></div>
-      </div>
     </script>
 	  
 	</td>
