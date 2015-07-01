@@ -57,35 +57,75 @@
       #layer_selector li.selected {
         background-color: #EEE;
       }
-	  #choropleth_selector {
+	  #net_type {
         position: absolute;
-        top: 110px;
+        top: 20px;
         right: 20px;
         padding: 0;
       }
 
-      #choropleth_selector ul {
+      #net_type ul {
         padding: 0; margin: 0;
         list-style-type: none;
       }
 
-      #choropleth_selector li {
+      #net_type li {
         border-bottom: 1px solid #999;
-        padding: 5px 10px;
+        padding: 5px 15px;
         font-family: "Helvetica", Arial;
         font-size: 13px;
         color: #444;
         cursor: auto;
       }
 
-      #choropleth_selector li:hover {
+      #net_type li:hover {
         background-color: #F0F0F0;
         cursor: pointer;
       }
 
-      #choropleth_selector li.selected {
+      #net_type li.selected {
         background-color: #EEE;
       }
+      
+   	  #signal {
+        position: absolute;
+        top: 85px;
+        left: 10px;
+        padding: 0;
+      }
+   
+      #signal li:hover {
+        background-color: #F0F0F0;
+        cursor: pointer;
+      }
+
+      #signal li.selected {
+        background-color: #EEE;
+      }
+      
+      #signal ul {
+        padding: 0; margin: 0;
+        list-style-type: none;
+      }
+
+      #signal li {
+        border-bottom: 1px solid #999;
+        padding: 5px 15px;
+        font-family: "Helvetica", Arial;
+        font-size: 13px;
+        color: #444;
+        cursor: auto;
+      }
+
+      #signal li:hover {
+        background-color: #F0F0F0;
+        cursor: pointer;
+      }
+
+      #signal li.selected {
+        background-color: #EEE;
+      }
+      
   </style>
   
   <script>
@@ -113,7 +153,10 @@
   function createSelectorDistrict(layer) {
 	var sql = new cartodb.SQL({ user: 'ehealthafrica' });
 	var $options = $('#layer_selector');
+	var $option_sig = $('#signal');
+	var $option_net_type = $('#net_type');
 
+	
 	$options.change(function(e) {
 
 	  // get the area of the selected layer
@@ -155,9 +198,28 @@
 		
 		
 	});
-  
-  
 
+  
+  $option_sig.click(function(e) {
+   var $li = $(e.target);
+   var signal = $li.attr('data'); 
+
+  		  	query = query + " AND signal_strength = '" + signal + "'";
+  			layer.setSQL(query);
+
+
+  });
+  
+  
+  $option_net_type.click(function(e) {  
+     var $li = $(e.target);
+     var net_type = $li.attr('data');
+     
+     		query = query + " AND network_type = '" + net_type + "'";
+  			layer.setSQL(query);
+  			alert(query);
+
+  });
   
 }  
   
@@ -222,11 +284,11 @@
            type: "custom",
            data: [
             { name: "Excellent", value: "#136400" },
+            { name: "Very Good", value: "#229A00" },
             { name: "Good", value: "#b2df8a" },
             { name: "Moderate", value: "#5CA2D1" },
             { name: "No Service", value: "#FF9900" },
-            { name: "Unlikely Service", value: "#FF2900" },
-            { name: "Very Good", value: "#229A00" }
+            { name: "Unlikely Service", value: "#FF2900" }
            ]
 		});
 		
@@ -305,6 +367,7 @@
 		return airtel_layer;
 		
 	  }
+	  
 	}	  
 	$('.button').click(function() {
 	  $(this).addClass('selected');
@@ -363,6 +426,23 @@ $('.button').bind( "click", checkclick );
 																<option value="Western Area Urban                                          ">Western Area Urban										</option>																
 		</select>
 
+<br>
+<br>
+		<div id="signal" class="cartodb-infobox">
+		  <ul>
+		  	<li data="Excellent           ">Excellent</li>
+		  	<li data="Very Good           ">Very Good</li>
+		  	<li data="Good                ">Good</li>
+			<li data="Moderate            ">Moderate</li>
+			<li data="No Service            ">No Service</li>
+			<li data="Unlikely Service            ">Unlikely Service</li>
+
+
+
+
+		  </ul>
+		</div>	
+
 		</div>
 		</div>		  
 	</div>
@@ -370,6 +450,15 @@ $('.button').bind( "click", checkclick );
     <td width="" height="100%">	
  
 	  <div id='map'></div>
+
+
+		<div id="net_type" class="cartodb-infobox">
+		  <ul>
+		  	<li data="2G                  ">2G</li>
+			<li data="3G                  ">3G</li>
+			<li data="4G                  ">4G</li>
+		  </ul>
+		</div>
 	
       <div id='menu'>
 		<a href="#smart" id="smart" class="button smart">Smart</a> 
